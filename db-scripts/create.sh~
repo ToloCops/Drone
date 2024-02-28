@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# This creates db and user
+sudo -u postgres psql postgres -f create-db-user.sql
+
+# This creates db schema (tables)
+sudo -u postgres psql postgres -f schema.sql
+
+# Grant priviliges to user
+sudo -u postgres psql postgres -f grant.sql
