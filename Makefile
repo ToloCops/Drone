@@ -3,7 +3,7 @@ CC := g++
 SRCDIR := src
 OBJDIR := obj
 BINDIR := bin
-TARGET := $(BINDIR)/drone_simulation
+TARGET := $(BINDIR)/main
 SRCEXT := cpp
 SOURCES := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS := $(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SOURCES:.$(SRCEXT)=.o))

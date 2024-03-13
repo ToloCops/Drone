@@ -1,7 +1,7 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
-#include "Drone.h" // Includiamo il file header della classe Drone
+#include "drone.h" // Includiamo il file header della classe Drone
 #include <vector>
 
 class Environment {
