@@ -63,15 +63,3 @@ public:
     }
 };
 
-int main() {
-    // Esempio di utilizzo della classe Drone
-    Drone drone1(1, 50.0, std::make_pair(0.0, 0.0)); // Creazione di un drone con ID 1, livello di batteria 50% e posizione iniziale (0, 0)
-
-    // Eseguiamo alcune azioni sul drone
-    drone1.takeOff();
-    drone1.moveTo(10.0, 10.0);
-    drone1.land();
-    drone1.recharge();
-
-    return 0;
-}
