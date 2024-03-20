@@ -98,6 +98,9 @@ void Environment::planSurveillance() {
 int main() {
     Environment environment(100.0, 100.0);
     Drone drone1(1, 50.0, std::make_pair(0.0, 0.0));
+    redisContext *c2r;
+    c2r = redisConnect("localhost", 6379);
+    printf("main(): pid %d: user %s: connected to redis\n", 3, "prova");
     environment.addDrone(drone1);
     environment.runSimulation();
 

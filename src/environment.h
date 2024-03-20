@@ -2,6 +2,11 @@
 #define ENVIRONMENT_H
 
 #include "drone.h" // Includiamo il file header della classe Drone
+#include "con2redis.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
 #include <vector>
 #include <chrono>
 #include <thread>
