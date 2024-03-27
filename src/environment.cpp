@@ -7,6 +7,8 @@
 #include <ctime>   // Per l'inizializzazione del generatore di numeri casuali
 #include <cmath>   // Per le operazioni matematiche
 
+#define WRITE_STREAM "control_to_drones"
+
 // Implementazioni dei metodi della classe Environment
 
 // Costruttore
@@ -99,9 +101,33 @@ int main() {
     Environment environment(100.0, 100.0);
     Drone drone1(1, 50.0, std::make_pair(0.0, 0.0));
     redisContext *c2r;
+    redisReply *reply;
+    int block = 1000000000;
+
     c2r = redisConnect("localhost", 6379);
-    printf("main(): pid %d: user %s: connected to redis\n", 3, "prova");
+    printf("main(): pid = %d: user %s: connected to redis\n", 3, "prova");
+
+    reply = RedisCommand(c2r, "DEL %s", WRITE_STREAM);
+    assertReply(c2r, reply);
+    dumpReply(reply, 0);
+
+    initStreams(c2r, WRITE_STREAM);
+
+    reply = RedisCommand(c2r, "XADD %s * %s %s", WRITE_STREAM, "3", "ciao");
+    assertReplyType(c2r, reply, REDIS_REPLY_STRING);
+    printf("main(): pid = %d: stream %s: Added %s -> %s (id: %s)\n", 3, WRITE_STREAM, "3", "ciao", reply->str);
+    freeReplyObject(reply);
+
+    reply = RedisCommand(c2r, "XADD %s * %s %s", WRITE_STREAM, "5", "ok");
+    assertReplyType(c2r, reply, REDIS_REPLY_STRING);
+    printf("main(): pid = %d: stream %s: Added %s -> %s (id: %s)\n", drone1.getId(), WRITE_STREAM, "5", "ok", reply->str);
+    freeReplyObject(reply);
+
     environment.addDrone(drone1);
+    reply = RedisCommand(c2r, "XREADGROUP GROUP diameter %s COUNT 1 NOACK STREAMS %s %s > >", "luca", WRITE_STREAM, WRITE_STREAM);
+    assertReply(c2r, reply);
+    printf("%s\n", reply->str);
+    freeReplyObject(reply);
     environment.runSimulation();
 
     return 0;
