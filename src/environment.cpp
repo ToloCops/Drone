@@ -6,6 +6,7 @@
 #include <cstdlib> // Per la generazione di numeri casuali
 #include <ctime>   // Per l'inizializzazione del generatore di numeri casuali
 #include <cmath>   // Per le operazioni matematiche
+#include <random>
 
 #define WRITE_STREAM "control_to_drones"
 
@@ -29,6 +30,35 @@ void Environment::addDrone(const Drone& drone) {
     drones.push_back(drone);
 }
 
+void Environment::generateRandomDrones(int numDrones) {
+    std::mt19937 rng(std::time(nullptr)); // Generatore di numeri casuali
+    std::uniform_real_distribution<double> batteryDist(20.0, 100.0); // Batteria da 20.0 a 100.0
+    std::uniform_real_distribution<double> positionDist(0.0, areaWidth); // Posizione x da 0.0 a areaWidth
+    std::uniform_real_distribution<double> positionDistY(0.0, areaHeight); // Posizione y da 0.0 a areaHeight
+
+    for (int i = 0; i < numDrones; ++i) {
+        int id = drones.size() + 1; // Id univoco per ogni drone
+        double battery = batteryDist(rng);
+        double speed = 30;
+        double x = positionDist(rng);
+        double y = positionDistY(rng);
+        Drone newDrone(id, battery, speed, x, y);
+        addDrone(newDrone); // Aggiunge il drone appena creato all'ambiente
+    }
+}
+
+void Environment::status() {
+    for (Drone& drone : drones) {
+        printf("Drone %d: battery = %f, velocity = %f, position = (%f, %f)\n", drone.getId(), drone.getBattery(), drone.getSpeed(), drone.getPosition().first, drone.getPosition().second);
+    }
+    printf("%d, %d\n", numGridRows, numGridCols);
+}
+
+void Environment::runSimulation() {
+    planSurveillance();
+}
+
+/*
 // Metodo per eseguire una simulazione
 void Environment::runSimulation() {
     double x, y;
@@ -63,7 +93,7 @@ void Environment::runSimulation() {
         // Attendi un intervallo di tempo (es. 5 minuti)
         std::this_thread::sleep_for(std::chrono::minutes(5));
     }
-}
+}*/
 
 // Metodo per pianificare le sorveglianze
 void Environment::planSurveillance() {
@@ -76,7 +106,8 @@ void Environment::planSurveillance() {
                 // Calcola le coordinate del centro della cella
                 double cellCenterX = (col + 0.5) * surveillanceCellSize;
                 double cellCenterY = (row + 0.5) * surveillanceCellSize;
-
+                printf("%f, %f\n", cellCenterX, cellCenterY);
+                /*
                 // Invia istruzioni ai droni per muoversi verso il centro della cella
                 for (Drone& drone : drones) {
                     double droneX, droneY;
@@ -90,17 +121,44 @@ void Environment::planSurveillance() {
                         // Muove il drone verso il centro della cella
                         drone.moveTo(cellCenterX, cellCenterY);
                     }
-                }
+                }*/
             }
+        }
+    }
+}
+
+void stampa_elementi(struct redisReply **element, size_t num_elementi) {
+    for (size_t i = 0; i < num_elementi; ++i) {
+        printf("Elemento %zu:\n", i);
+        printf("  Type: %d\n", element[i]->type);
+        printf("  Integer: %lld\n", element[i]->integer);
+        printf("  Double: %f\n", element[i]->dval);
+        printf("  Len: %zu\n", element[i]->len);
+        printf("  String: %s\n", element[i]->str);
+        printf("  VType: %s\n", element[i]->vtype);
+        printf("  Elements: %zu\n", element[i]->elements);
+
+        // Ricorsivamente stampa gli elementi, se è un array
+        if (element[i]->type == REDIS_REPLY_ARRAY) {
+            printf("  Elementi dell'array:\n");
+            stampa_elementi(element[i]->element, element[i]->elements);
         }
     }
 }
 
 
 int main() {
-    Environment environment(100.0, 100.0);
-    Drone drone1(1, 50.0, std::make_pair(0.0, 0.0));
-    redisContext *c2r;
+    double areaWidth = 6000.0;
+    double areaHeight = 6000.0;
+    Environment environment(areaWidth, areaHeight);
+    /*Drone drone1(1, 30.0, 30.0, 0, 0);
+    environment.addDrone(drone1);
+    Drone drone2(2, 22, 15, 5, 9);
+    environment.addDrone(drone2);*/
+    environment.generateRandomDrones(5);
+    environment.status();
+    environment.runSimulation();
+    /*redisContext *c2r;
     redisReply *reply;
     int block = 1000000000;
 
@@ -123,12 +181,14 @@ int main() {
     printf("main(): pid = %d: stream %s: Added %s -> %s (id: %s)\n", drone1.getId(), WRITE_STREAM, "5", "ok", reply->str);
     freeReplyObject(reply);
 
+    micro_sleep(1000000);
+
     environment.addDrone(drone1);
-    reply = RedisCommand(c2r, "XREADGROUP GROUP diameter %s COUNT 1 NOACK STREAMS %s %s > >", "luca", WRITE_STREAM, WRITE_STREAM);
+    reply = RedisCommand(c2r, "XREADGROUP GROUP diameter %s BLOCK %d COUNT 2 NOACK STREAMS %s >", "luca", block, WRITE_STREAM);
     assertReply(c2r, reply);
-    printf("%s\n", reply->str);
+    stampa_elementi(reply->element, reply->elements);
     freeReplyObject(reply);
-    environment.runSimulation();
+    environment.runSimulation();*/
 
     return 0;
 }

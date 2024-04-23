@@ -32,6 +32,10 @@ public:
     // Metodo per aggiungere un drone all'ambiente
     void addDrone(const Drone& drone);
 
+    void generateRandomDrones(int numDrones);
+
+    void status();
+
     // Metodo per eseguire una simulazione
     void runSimulation();
 
@@ -39,6 +43,8 @@ private:
     // Metodo per pianificare le sorveglianze
     void planSurveillance();
 };
+
+int micro_sleep(long usec);
 
 #endif // ENVIRONMENT_H
 
