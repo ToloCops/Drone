@@ -1,5 +1,6 @@
 #include "drone.h"
 #include "environment.h"
+#include "route.h"
 
 #include <iostream>
 #include <vector>
@@ -94,7 +95,7 @@ void Environment::runSimulation() {
         std::this_thread::sleep_for(std::chrono::minutes(5));
     }
 }*/
-
+/*
 // Metodo per pianificare le sorveglianze
 void Environment::planSurveillance() {
     // Itera su ogni cella della griglia di sorveglianza
@@ -107,7 +108,7 @@ void Environment::planSurveillance() {
                 double cellCenterX = (col + 0.5) * surveillanceCellSize;
                 double cellCenterY = (row + 0.5) * surveillanceCellSize;
                 printf("%f, %f\n", cellCenterX, cellCenterY);
-                /*
+                
                 // Invia istruzioni ai droni per muoversi verso il centro della cella
                 for (Drone& drone : drones) {
                     double droneX, droneY;
@@ -121,10 +122,40 @@ void Environment::planSurveillance() {
                         // Muove il drone verso il centro della cella
                         drone.moveTo(cellCenterX, cellCenterY);
                     }
-                }*/
+                }
             }
         }
     }
+}*/
+
+void Environment::planSurveillance(){
+    double control_center = 3000.0;
+    int count_center = 0;
+    int count_side = 0;
+    for (int col = 0; col < numGridCols; ++col) {
+        if (col % 4 != 0) {
+            continue;
+        }
+        double cellCenterX = (col + 0.5) * surveillanceCellSize;
+        double cellCenterY = 0.5 * surveillanceCellSize;
+        printf("Colonna %d ", col);
+        if (cellCenterX-control_center <= 1480.0 and cellCenterX-control_center >= -1480.0) {
+            printf("centro\n");
+            count_center++;
+        }
+        else {
+            printf("lato\n");
+            count_side++;
+            Route route;
+            for (int y = cellCenterY; y < areaHeight; y += 10) {
+            route.addPoint(cellCenterX, y);
+            }
+            std::pair<int, int> p = route.getRoute().back();
+            std::cout << "(" << p.first << ", " << p.second << ")" << std::endl;
+        }
+    }
+    printf("Colonne centro: %d\n", count_center);
+    printf("Colonne lato: %d\n", count_side);
 }
 
 void stampa_elementi(struct redisReply **element, size_t num_elementi) {
